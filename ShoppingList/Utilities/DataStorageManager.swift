@@ -12,6 +12,7 @@ import RealmSwift
 protocol DataStorageProtocol {
     func storeListItem(inputText: String)
     func searchListItems(searchString: String, exactMatch: Bool) -> [ListItem]
+    func getCurrentListItems() -> [ListItem]
 }
 
 class DataStorageManager: DataStorageProtocol {
@@ -73,6 +74,11 @@ class DataStorageManager: DataStorageProtocol {
         }
         
         return result
+    }
+    
+    func getCurrentListItems() -> [ListItem] {
+        guard let realm = realm else { return [] }
+        return realm.objects(ListItem.self).filter({$0.isInCurrentList})
     }
     
 }
