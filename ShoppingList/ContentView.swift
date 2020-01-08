@@ -25,13 +25,17 @@ struct ContentView: View {
     @ObservedObject var viewModel: ContentViewModel
 
     init(viewModel: ContentViewModel = ContentViewModel()) {
-      self.viewModel = viewModel
+        self.viewModel = viewModel
     }
     
     var body: some View {
         VStack {
-            TextField("e.g. Milk", text: $viewModel.inputText)
+            TextField("e.g. Milk", text: $viewModel.inputText, onCommit: didCommitInput)
         }
+    }
+    
+    private func didCommitInput() {
+        
     }
 }
 

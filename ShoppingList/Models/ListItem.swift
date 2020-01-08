@@ -23,10 +23,17 @@ class ListItem: Object {
     @objc dynamic var amount: Double = 0.0
     @objc dynamic var amountUnitIntRepresentation: Int = -1
     @objc dynamic var timesUsed: Int = 0
-    @objc dynamic var isInCurrentList: Bool = false
+    @objc dynamic var showAmount: Bool = false
+    @objc dynamic var isInCurrentList: Bool = true
     @objc dynamic var isDone: Bool = false
+    
+    convenience init(title: String) {
+        self.init()
+        self.title = title
+    }
     
     var amountUnit: AmountUnit {
         return AmountUnit(rawValue: amountUnitIntRepresentation) ?? .none
     }
+    
 }
