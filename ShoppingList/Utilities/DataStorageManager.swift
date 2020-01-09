@@ -13,6 +13,7 @@ protocol DataStorageProtocol {
     func storeListItem(inputText: String)
     func searchListItems(searchString: String, exactMatch: Bool) -> [ListItem]
     func getCurrentListItems() -> [ListItem]
+    func toggleIsInList(for listItem: ListItem)
 }
 
 class DataStorageManager: DataStorageProtocol {
@@ -58,7 +59,7 @@ class DataStorageManager: DataStorageProtocol {
         
         let filterPredicate = exactMatch
             ? "title = '\(searchString)'"
-            : "title BEGINSWITH[c] '\(searchString)'"
+            : "title BEGINSWITH[c] '\(searchString)' AND isInCurrentList = FALSE"
         
         var result: [ListItem]!
         
@@ -70,6 +71,7 @@ class DataStorageManager: DataStorageProtocol {
             result = realm.objects(ListItem.self)
                 .filter(filterPredicate)
                 .sorted(byKeyPath: "timesUsed", ascending: false)
+                .filter({!$0.isInCurrentList || exactMatch})
                 .map({$0})
         }
         
@@ -79,6 +81,17 @@ class DataStorageManager: DataStorageProtocol {
     func getCurrentListItems() -> [ListItem] {
         guard let realm = realm else { return [] }
         return realm.objects(ListItem.self).filter({$0.isInCurrentList})
+    }
+    
+    func toggleIsInList(for listItem: ListItem) {
+        guard let realm = realm else { return }
+        do {
+            try realm.write {
+                listItem.isInCurrentList = !listItem.isInCurrentList
+            }
+        } catch {
+            print("Failed to toggle isInCurrentList due to error: \(error.localizedDescription)")
+        }
     }
     
 }

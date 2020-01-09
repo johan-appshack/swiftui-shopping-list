@@ -7,19 +7,6 @@
 //
 
 import SwiftUI
-import Combine
-
-class ContentViewModel: ObservableObject {
-    @Published var inputText: String = ""
-    @Published var dataSource: [ListItem] = []
-    
-    private let dataStorageManager: DataStorageProtocol
-    
-    init(dataStorageManager: DataStorageProtocol = DataStorageManager()) {
-        self.dataStorageManager = dataStorageManager
-    }
-    
-}
 
 struct ContentView: View {
     @ObservedObject var viewModel: ContentViewModel
@@ -29,13 +16,49 @@ struct ContentView: View {
     }
     
     var body: some View {
-        VStack {
-            TextField("e.g. Milk", text: $viewModel.inputText, onCommit: didCommitInput)
+        HStack {
+            VStack {
+                List {
+                    TextField("e.g. Milk", text: $viewModel.inputText, onCommit: didCommitInput).background(Color.clear)
+                    
+                    Section {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack {
+                                Text("No suggestions found").foregroundColor(Color.red)
+                            }
+                        }
+                    }
+                    
+                    if viewModel.currentListItems.isEmpty {
+                        Section {
+                            Text("Nothing found").foregroundColor(Color.red)
+                        }
+                    } else {
+                        currentItemsSection
+                    }
+                }
+            }
+            .padding(.top, 50)
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+            .background(LinearGradient(gradient: Gradient(colors: [Color.purple, Color.blue]),
+                                       startPoint: .top,
+                                       endPoint: .bottom))
+        }
+        .edgesIgnoringSafeArea([.top, .bottom])
+    }
+    
+    var currentItemsSection: some View {
+        Section {
+            ForEach(viewModel.currentListItems, content: ListItemRow.init(viewModel:)).onDelete(perform: deleteItems)
         }
     }
     
+    private func deleteItems(at offsets: IndexSet) {
+        viewModel.toggleIsInList(itemIndex: offsets.first ?? 0)
+    }
+    
     private func didCommitInput() {
-        
+        viewModel.storeInput()
     }
 }
 
